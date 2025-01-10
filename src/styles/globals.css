@@ -1,21 +1,130 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Reset básico para consistência entre navegadores */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Estilos globais */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f8f9fa; /* Fundo claro e neutro */
+  color: #333; /* Texto escuro para legibilidade */
+  line-height: 1.6; /* Melhor espaçamento entre linhas */
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Cabeçalhos */
+h1, h2, h3, h4, h5, h6 {
+  color: #222; /* Tons mais escuros para destaque */
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+/* Links */
+a {
+  color: #007bff; /* Azul sutil */
+  text-decoration: none;
+}
+
+a:hover {
+  color: #0056b3; /* Tom mais escuro no hover */
+  text-decoration: underline;
+}
+
+/* Botões */
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Inputs */
+input, textarea, select {
+  font-size: 16px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  width: 100%;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Listas */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+/* Rodapé */
+footer {
+  margin-top: auto;
+  padding: 20px;
+  background-color: #f1f1f1;
+  text-align: center;
+  color: #666;
+}
+
+/* Adaptação para dispositivos menores */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  input, button {
+    width: 100%;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* Estilo padrão para os cards de vídeo */
+.video-card {
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+/* Estilo para vídeos com a palavra "elite" no título */
+.video-card.elite-video {
+  background-color: #f8d7da; /* Tom leve de vermelho (pode ajustar conforme necessário) */
+  border-color: #f5c6cb; /* Cor da borda para combinar */
+}
+
+.video-card h3 {
+  color: #333;
+}
+
+.video-card h3 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 10px;
+
+  /* Limitar o título a duas linhas e adicionar elipsis (...) */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limita a 2 linhas */
+  -webkit-box-orient: vertical;
 }
