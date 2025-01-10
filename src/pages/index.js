@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import SearchMusic from '../components/SearchMusic';
+import Link from 'next/link'; // Importa o Link para navegação entre páginas
 
 export default function Home() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [alertMessage, setAlertMessage] = useState(''); // Novo estado para armazenar a mensagem de alerta
+  const [alertMessage, setAlertMessage] = useState('');
 
   const handleSearch = async (query) => {
     if (!query.trim()) {
@@ -18,7 +19,7 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json();
         setResults(data.results || []);
-        return data.results || []; // Retorna os resultados para a validação
+        return data.results || [];
       } else {
         console.error('Erro na API:', await response.text());
         setResults([]);
@@ -34,7 +35,7 @@ export default function Home() {
   };
 
   const handleAlert = (message) => {
-    setAlertMessage(message); // Atualiza a mensagem de alerta
+    setAlertMessage(message);
   };
 
   return (
@@ -59,9 +60,8 @@ export default function Home() {
               <p style={{ color: '#888', fontSize: '18px' }}>Nenhum resultado encontrado :(</p>
             ) : (
               results.map((music, index) => {
-                // Verificar se o vídeo é do canal Elite
                 const isElite = music.isElite;
-                
+
                 return (
                   <div
                     key={index}
@@ -69,7 +69,7 @@ export default function Home() {
                       width: '300px',
                       padding: '15px',
                       borderRadius: '15px',
-                      backgroundColor: isElite ? '#f8d7da' : '#ffffff', // Destacar as músicas do canal Elite
+                      backgroundColor: isElite ? '#f8d7da' : '#ffffff',
                       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
                       textAlign: 'center',
                       border: isElite ? '1px solid #f5c6cb' : '1px solid #ccc',
@@ -86,7 +86,7 @@ export default function Home() {
                         display: 'block',
                         width: '100%',
                         height: '0',
-                        paddingBottom: '56.25%', // Proporção 16:9
+                        paddingBottom: '56.25%',
                         backgroundImage: `url(https://img.youtube.com/vi/${music.url.split('v=')[1]}/0.jpg)`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
@@ -103,7 +103,7 @@ export default function Home() {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         display: '-webkit-box',
-                        WebkitLineClamp: 2, // Limita a 2 linhas
+                        WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
                       }}
                     >
@@ -111,16 +111,26 @@ export default function Home() {
                     </h3>
 
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px' }}>
-                      <a
-                        href="/indicate"
-                        style={{
-                          textDecoration: 'none',
-                          color: '#0070f3',
-                          fontWeight: 'bold',
+                      {/* Link para a página de indicar música com o link do vídeo passado como parâmetro */}
+                      <Link
+                        href={{
+                          pathname: '/IndicateMusic',
+                          query: { youtubeLink: music.url },
                         }}
+                        passHref
                       >
-                        Indicar Música
-                      </a>
+                        <div
+                          style={{
+                            textDecoration: 'none',
+                            color: '#0070f3',
+                            fontWeight: 'bold',
+                            cursor: 'pointer', // Opcional: Para dar um visual de link
+                          }}
+                        >
+                          Indicar Música
+                        </div>
+                      </Link>
+
                     </div>
                   </div>
                 );

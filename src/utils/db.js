@@ -29,6 +29,18 @@ async function createIndicationsTable() {
 // Função para salvar a indicação no banco de dados
 export async function saveIndication({ name, email, youtubeLink }) {
   const db = await openDb();
+
+  // Verifica se já existe uma indicação com o mesmo e-mail
+  const existingIndication = await db.get(
+    'SELECT * FROM indications WHERE email = ?',
+    [email]
+  );
+
+  if (existingIndication) {
+    throw new Error('Este e-mail já fez uma indicação.');
+  }
+
+  // Se não houver indicação com esse e-mail, insere a nova
   await db.run(
     'INSERT INTO indications (name, email, youtubeLink, createdAt) VALUES (?, ?, ?, ?)',
     [name, email, youtubeLink, new Date()]
