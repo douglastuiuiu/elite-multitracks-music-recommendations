@@ -4,8 +4,8 @@ import fs from 'fs';
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
-      // Caminho completo para o arquivo `database.db`
-      const filePath = path.resolve('./database.db');
+      // Caminho completo para o arquivo `database.db` dentro do diretório público
+      const filePath = path.resolve('./public/database.db'); // Confirma o caminho correto
 
       // Verifica se o arquivo existe
       if (!fs.existsSync(filePath)) {

@@ -1,19 +1,19 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import fs from 'fs';
+import path from 'path';
 
 // Função para abrir a conexão com o banco de dados
 export async function openDb() {
   const db = await open({
-    filename: './database.db',
+    filename: './public/database.db',
     driver: sqlite3.Database,
   });
   return db;
 }
 
-// Função para criar a tabela de indicações
-async function createIndicationsTable() {
-  const db = await openDb();
-
+// Função para criar a tabela de indicações (caso não exista)
+async function createIndicationsTable(db) {
   await db.run(`
     CREATE TABLE IF NOT EXISTS indications (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,6 +25,31 @@ async function createIndicationsTable() {
   `);
 
   console.log('Tabela "indications" criada ou já existente.');
+}
+
+// Função para sobrescrever o banco de dados (remover e recriar)
+async function overwriteDatabase() {
+  const dbPath = path.join(process.cwd(), 'public', 'database.db');
+
+  // Verificar se o arquivo do banco de dados já existe
+  if (fs.existsSync(dbPath)) {
+    try {
+      // Excluir o arquivo existente
+      fs.unlinkSync(dbPath);
+      console.log('Arquivo de banco de dados antigo removido.');
+    } catch (error) {
+      console.error('Erro ao excluir o banco de dados:', error);
+    }
+  }
+
+  // Criar um novo banco de dados
+  const db = await openDb();
+
+  // Criar a tabela de indicações (caso não exista)
+  await createIndicationsTable(db);
+  console.log('Novo banco de dados criado e tabela "indications" recriada.');
+
+  return db;
 }
 
 // Função para salvar uma indicação no banco de dados
@@ -58,10 +83,20 @@ export async function getMusicFromChannel(searchTerm) {
   return videos;
 }
 
-// Inicializar o banco de dados ao iniciar a aplicação
+// Inicializar o banco de dados ao iniciar a aplicação (só executa no primeiro carregamento)
 (async () => {
   try {
-    await createIndicationsTable();
+    const dbPath = path.join(process.cwd(), 'public', 'database.db');
+    
+    // Verificar se o arquivo do banco de dados existe
+    if (!fs.existsSync(dbPath)) {
+      // Sobrescrever o banco de dados e recriar a tabela apenas se o banco não existir
+      await overwriteDatabase(); 
+    } else {
+      // Se o banco já existir, apenas criar a tabela caso não exista
+      const db = await openDb();
+      await createIndicationsTable(db);
+    }
   } catch (err) {
     console.error('Erro ao inicializar o banco de dados:', err);
   }
