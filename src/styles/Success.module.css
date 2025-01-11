@@ -1,0 +1,43 @@
+.container {
+    text-align: center;
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+  }
+  
+  .message {
+    margin-top: 15%;
+    margin-bottom: 2rem;
+  }
+  
+  .title {
+    color: #2e7d32; /* Verde sucesso */
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .text {
+    color: #555;
+    font-size: 1.2rem;
+  }
+  
+  .actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+  
+  .button {
+    background-color: #1976d2; /* Azul amigável */
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .button:hover {
+    background-color: #1565c0; /* Azul escuro ao passar o mouse */
+  }
+  

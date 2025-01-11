@@ -69,7 +69,7 @@ export default function IndicateMusic() {
         setMessage('Indicação realizada com sucesso!');
         setName('');
         setEmail('');
-        router.push('/success'); // Opcional: redirecionar após sucesso
+        router.push('/Success'); // Opcional: redirecionar após sucesso
       } else {
         setMessage(data.error || 'Erro ao realizar a indicação.');
       }
