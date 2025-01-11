@@ -5,10 +5,13 @@ import path from 'path';
 
 // Função para abrir a conexão com o banco de dados
 export async function openDb() {
+  const dbPath = path.join('/tmp', 'database.db');  // Alterado para usar a pasta /tmp
+
   const db = await open({
-    filename: './public/database.db',
+    filename: dbPath,
     driver: sqlite3.Database,
   });
+
   return db;
 }
 
@@ -29,7 +32,7 @@ async function createIndicationsTable(db) {
 
 // Função para sobrescrever o banco de dados (remover e recriar)
 async function overwriteDatabase() {
-  const dbPath = path.join(process.cwd(), 'public', 'database.db');
+  const dbPath = path.join(process.cwd(), 'tmp', 'database.db');
 
   // Verificar se o arquivo do banco de dados já existe
   if (fs.existsSync(dbPath)) {
@@ -86,7 +89,7 @@ export async function getMusicFromChannel(searchTerm) {
 // Inicializar o banco de dados ao iniciar a aplicação (só executa no primeiro carregamento)
 (async () => {
   try {
-    const dbPath = path.join(process.cwd(), 'public', 'database.db');
+    const dbPath = path.join(process.cwd(), 'tmp', 'database.db');
     
     // Verificar se o arquivo do banco de dados existe
     if (!fs.existsSync(dbPath)) {
