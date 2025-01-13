@@ -1,7 +1,6 @@
-import { createObjectCsvWriter } from 'csv-writer';
 import { getDb } from '../../utils/db'; // Função para obter o banco de dados MongoDB
-import path from 'path';
-import fs from 'fs';
+import { Writable } from 'stream';
+import { format } from 'fast-csv';
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
@@ -13,43 +12,43 @@ export default async function handler(req, res) {
       // Buscar todas as indicações
       const indications = await collection.find({}).toArray();
 
-      // Transformar os dados para o formato esperado pelo CSV Writer
-      const csvData = indications.map((indication) => ({
-        name: indication.name,
-        email: indication.email,
-        youtubeLink: indication.youtubeLink,
-        createdAt: new Date(indication.createdAt).toLocaleString(),
-      }));
+      // Verificar se há indicações
+      if (indications.length === 0) {
+        console.log('Nenhuma indicação encontrada no banco');
+        return res.status(404).json({ error: 'Nenhuma indicação encontrada' });
+      }
 
-      // Definir o caminho para o arquivo CSV (salvando na pasta temporária)
+      // Gerar o nome do arquivo com timestamp
       const timestamp = new Date().toISOString().replace(/[:]/g, '-');
-      const filePath = path.join(process.cwd(), 'public', `indications_${timestamp}.csv`);
+      const fileName = `indications_${timestamp}.csv`;
 
-      const csvWriter = createObjectCsvWriter({
-        path: filePath, // Caminho dinâmico com data
-        header: [
-          { id: 'name', title: 'Nome' },
-          { id: 'email', title: 'Email' },
-          { id: 'youtubeLink', title: 'Link do YouTube' },
-          { id: 'createdAt', title: 'Data de Criação' },
-        ],
-      });
+      // Definir cabeçalhos do CSV
+      const headers = ['Nome', 'Email', 'Link do YouTube', 'Data de Criação'];
 
-      // Escrever os dados no arquivo CSV
-      await csvWriter.writeRecords(csvData);
+      // Definir os dados para o CSV
+      const csvData = indications.map((indication) => [
+        indication.name,
+        indication.email,
+        indication.youtubeLink,
+        new Date(indication.createdAt).toLocaleString(),
+      ]);
 
-      // Definir o cabeçalho para download do arquivo CSV
+      // Enviar o CSV como resposta diretamente
       res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', `attachment; filename=indications_${timestamp}.csv`);
+      res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
 
-      // Enviar o arquivo CSV diretamente para o cliente
-      const fileStream = fs.createReadStream(filePath);
-      fileStream.pipe(res);
+      // Criar e configurar o fluxo de escrita
+      const csvStream = format({ headers: true });
 
-      // Após o arquivo ser enviado, excluir o arquivo do servidor
-      fileStream.on('end', () => {
-        fs.unlinkSync(filePath); // Apagar o arquivo após o envio
-      });
+      // Criar um Writable stream para enviar o CSV
+      csvStream.pipe(res);
+
+      // Escrever os dados no fluxo
+      csvData.forEach((row) => csvStream.write(row));
+
+      // Finalizar o stream de CSV
+      csvStream.end();
+
     } catch (error) {
       console.error('Erro ao gerar o CSV:', error);
       res.status(500).json({ error: 'Erro ao gerar o CSV' });
