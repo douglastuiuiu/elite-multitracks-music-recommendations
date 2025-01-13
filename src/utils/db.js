@@ -10,7 +10,7 @@ let db;
 // Função para abrir ou reutilizar a conexão com o MongoDB
 export async function getDb() {
   if (!client) {
-    client = new MongoClient(url, { useUnifiedTopology: true }); // Atualizado para remover `useNewUrlParser`
+    client = new MongoClient(url); // Remove `useUnifiedTopology`
     await client.connect();
     console.log('Conectado ao banco de dados MongoDB Atlas');
   }
