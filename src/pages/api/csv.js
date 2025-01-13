@@ -1,6 +1,7 @@
 import { getDb } from '../../utils/db'; // Função para obter o banco de dados MongoDB
-import { Writable } from 'stream';
 import { format } from 'fast-csv';
+import path from 'path';
+import fs from 'fs';
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
@@ -18,9 +19,14 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Nenhuma indicação encontrada' });
       }
 
+      console.log('Indicações encontradas:', indications);
+
       // Gerar o nome do arquivo com timestamp
       const timestamp = new Date().toISOString().replace(/[:]/g, '-');
       const fileName = `indications_${timestamp}.csv`;
+
+      // Caminho do arquivo temporário no diretório /tmp
+      const filePath = path.join('/tmp', fileName);
 
       // Definir cabeçalhos do CSV
       const headers = ['Nome', 'Email', 'Link do YouTube', 'Data de Criação'];
@@ -33,22 +39,35 @@ export default async function handler(req, res) {
         new Date(indication.createdAt).toLocaleString(),
       ]);
 
-      // Enviar o CSV como resposta diretamente
-      res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+      // Criar fluxo de escrita para o CSV
+      const writableStream = fs.createWriteStream(filePath);
 
-      // Criar e configurar o fluxo de escrita
+      // Criar e configurar o fluxo do CSV
       const csvStream = format({ headers: true });
 
-      // Criar um Writable stream para enviar o CSV
-      csvStream.pipe(res);
+      // Pipar o fluxo para o arquivo
+      csvStream.pipe(writableStream);
 
-      // Escrever os dados no fluxo
+      // Escrever as linhas no CSV
       csvData.forEach((row) => csvStream.write(row));
 
-      // Finalizar o stream de CSV
+      // Finalizar o fluxo
       csvStream.end();
 
+      writableStream.on('finish', () => {
+        // Enviar o arquivo gerado como resposta
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+
+        // Ler o arquivo e enviar
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.pipe(res);
+
+        // Remover o arquivo do diretório temporário após enviar
+        fileStream.on('end', () => {
+          fs.unlinkSync(filePath); // Apagar o arquivo após o envio
+        });
+      });
     } catch (error) {
       console.error('Erro ao gerar o CSV:', error);
       res.status(500).json({ error: 'Erro ao gerar o CSV' });
