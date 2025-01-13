@@ -70,7 +70,17 @@ const Indications = () => {
                   Ver Vídeo
                 </a>
               </td>
-              <td>{new Date(indication.createdAt).toLocaleString()}</td>
+              <td>
+                {/* Formatação da data no padrão brasileiro */}
+                {new Date(indication.createdAt).toLocaleString('pt-BR', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                })}
+              </td>
               <td>
                 <button className={styles.deleteButton} onClick={() => handleDelete(indication._id)}>
                   Excluir

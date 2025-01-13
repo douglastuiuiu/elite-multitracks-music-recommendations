@@ -37,7 +37,14 @@ export default async function handler(req, res) {
         Email: indication.email,
         'Link do YouTube': indication.youtubeLink,
         'Excede 7min': indication.isLate ? 'Sim' : 'Não',
-        'Data de Criação': new Date(indication.createdAt).toLocaleString(),
+        'Data de Criação': new Date(indication.createdAt).toLocaleString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        }),
       }));
 
       // Criar fluxo de escrita para o CSV

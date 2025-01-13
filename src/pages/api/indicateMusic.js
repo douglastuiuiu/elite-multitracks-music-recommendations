@@ -1,8 +1,9 @@
 import { saveIndication } from '../../utils/db'; // Função para salvar indicação no banco
+import { youtubeScraper } from '../../utils/youtubeScraper'; // Importar a função getVideoDuration
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { name, email, youtubeLink, createdAt } = req.body;
+    const { name, email, youtubeLink } = req.body;
 
     // Verificar se todos os campos necessários estão presentes
     if (!name || !email || !youtubeLink) {
@@ -10,20 +11,18 @@ export default async function handler(req, res) {
     }
 
     try {
-      // Calcular a diferença de tempo entre agora e a data de criação
-      const createdAtDate = new Date(createdAt);
-      const now = new Date();
-      const timeDifference = (now - createdAtDate) / 1000 / 60; // Convertendo para minutos
+      // Obter a duração do vídeo
+      const videoDuration = await youtubeScraper.getVideoDuration(youtubeLink);
 
-      // Definir o valor de isLate com base no tempo
-      const isLate = timeDifference > 7;
+      // Definir o valor de isLate com base no tempo do vídeo
+      const isLate = videoDuration > 7; // Verifica se a duração do vídeo é maior que 7 minutos
 
       // Criar a indicação com o novo atributo isLate
       const indication = {
         name,
         email,
         youtubeLink,
-        createdAt: createdAtDate,
+        createdAt: new Date(), // Preencher com a data atual
         isLate,
       };
 
@@ -32,7 +31,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json({ success: 'Indicação salva com sucesso!' });
     } catch (error) {
-      // Caso já exista um e-mail registrado, retornamos a mensagem de erro
+      // Caso ocorra erro, retorna mensagem de erro
       return res.status(400).json({ error: error.message });
     }
   } else {
