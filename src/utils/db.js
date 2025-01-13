@@ -41,8 +41,9 @@ export async function saveIndication({ name, email, youtubeLink, createdAt, isLa
       email,
       youtubeLink,
       createdAt,
-      isLate, // Agora inclui o campo isLate
+      isLate,
     });
+    
     console.log('Indicação salva com sucesso.');
   } catch (error) {
     console.error('Erro ao salvar indicação:', error);

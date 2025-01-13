@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import YouTube from 'react-youtube';
 
@@ -9,47 +9,17 @@ export default function IndicateMusic() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isMusicValid, setIsMusicValid] = useState(true); // Verificação de música válida
-  const [existingMusicMessage, setExistingMusicMessage] = useState('');
 
   let videoId = '';
   if (youtubeLink && youtubeLink.includes('v=')) {
     videoId = youtubeLink.split('v=')[1].split('&')[0]; // Extrai o ID do vídeo
   }
 
-  useEffect(() => {
-    const checkMusicValidity = async () => {
-      if (!youtubeLink) return;
-
-      try {
-        const response = await fetch(`/api/checkMusic?youtubeLink=${encodeURIComponent(youtubeLink)}`);
-        if (response.ok) {
-          const data = await response.json();
-          setIsMusicValid(data.isValid);
-          setExistingMusicMessage(data.message || '');
-        } else {
-          console.error('Erro ao verificar a música');
-          setIsMusicValid(false);
-        }
-      } catch (error) {
-        console.error('Erro na verificação da música', error);
-        setIsMusicValid(false);
-      }
-    };
-
-    //checkMusicValidity();
-  }, [youtubeLink]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!name || !email || !youtubeLink) {
       setMessage('Todos os campos são obrigatórios.');
-      return;
-    }
-
-    if (!isMusicValid) {
-      setMessage(existingMusicMessage || 'Esta música já foi indicada ou está bloqueada.');
       return;
     }
 
@@ -116,19 +86,17 @@ export default function IndicateMusic() {
             <YouTube videoId={videoId} opts={{ height: '315', width: '100%' }} />
           </div>
           {message && <p style={{ color: message.includes('sucesso') ? 'green' : 'red', fontSize: '16px', textAlign: 'center' }}>{message}</p>}
-          {existingMusicMessage && <p style={{ color: 'red', fontSize: '16px', textAlign: 'center' }}>{existingMusicMessage}</p>}
           <div style={{ textAlign: 'center' }}>
             <button
               type="submit"
-              //disabled={loading || !isMusicValid}
               style={{
-                backgroundColor: loading || !isMusicValid ? '#ccc' : '#0070f3',
+                backgroundColor: loading ? '#ccc' : '#0070f3',
                 color: '#fff',
                 padding: '10px 20px',
                 border: 'none',
                 borderRadius: '5px',
                 fontWeight: 'bold',
-                cursor: loading || !isMusicValid ? 'not-allowed' : 'pointer',
+                cursor: loading ? 'not-allowed' : 'pointer',
               }}
             >
               {loading ? 'Enviando...' : 'Indicar Música'}

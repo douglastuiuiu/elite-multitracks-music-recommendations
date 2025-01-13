@@ -9,15 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.3.1",
     "@vercel/analytics": "^1.4.1",
     "@vercel/speed-insights": "^1.1.0",
-    "axios": "^1.7.9",
-    "better-sqlite3": "^11.7.2",
-    "cheerio": "^1.0.0",
-    "csv-writer": "^1.6.0",
     "fast-csv": "^5.0.2",
     "fs": "^0.0.1-security",
     "googleapis": "^144.0.0",
@@ -26,17 +20,11 @@
     "path": "^0.12.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-youtube": "^10.1.0",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7",
-    "yt-search": "^2.6.1",
-    "ytdl-core": "^4.11.5"
+    "react-youtube": "^10.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "depcheck": "^1.4.7",
     "eslint": "^9",
-    "eslint-config-next": "15.1.4",
     "postcss": "^8",
     "tailwindcss": "^3.4.1"
   }
