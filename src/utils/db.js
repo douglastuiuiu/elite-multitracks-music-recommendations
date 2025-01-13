@@ -23,7 +23,7 @@ export async function getDb() {
 }
 
 // Função para salvar uma indicação no MongoDB
-export async function saveIndication({ name, email, youtubeLink }) {
+export async function saveIndication({ name, email, youtubeLink, createdAt, isLate }) {
   const db = await getDb();
   const collection = db.collection('indications');
 
@@ -35,12 +35,13 @@ export async function saveIndication({ name, email, youtubeLink }) {
       throw new Error('Este e-mail já fez uma indicação.');
     }
 
-    // Insere uma nova indicação na coleção
+    // Insere uma nova indicação na coleção, incluindo o campo isLate
     await collection.insertOne({
       name,
       email,
       youtubeLink,
-      createdAt: new Date().toISOString(),
+      createdAt,
+      isLate, // Agora inclui o campo isLate
     });
     console.log('Indicação salva com sucesso.');
   } catch (error) {

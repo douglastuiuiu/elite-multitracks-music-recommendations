@@ -29,15 +29,16 @@ export default async function handler(req, res) {
       const filePath = path.join('/tmp', fileName);
 
       // Definir cabeçalhos do CSV
-      const headers = ['Nome', 'Email', 'Link do YouTube', 'Data de Criação'];
+      const headers = ['Nome', 'Email', 'Link do YouTube', 'Excede 7min', 'Data de Criação'];
 
       // Definir os dados para o CSV
-      const csvData = indications.map((indication) => [
-        indication.name,
-        indication.email,
-        indication.youtubeLink,
-        new Date(indication.createdAt).toLocaleString(),
-      ]);
+      const csvData = indications.map((indication) => ({
+        Nome: indication.name,
+        Email: indication.email,
+        'Link do YouTube': indication.youtubeLink,
+        'Excede 7min': indication.isLate ? 'Sim' : 'Não',
+        'Data de Criação': new Date(indication.createdAt).toLocaleString(),
+      }));
 
       // Criar fluxo de escrita para o CSV
       const writableStream = fs.createWriteStream(filePath);
@@ -48,7 +49,7 @@ export default async function handler(req, res) {
       // Pipar o fluxo para o arquivo
       csvStream.pipe(writableStream);
 
-      // Escrever as linhas no CSV
+      // Escrever os dados no CSV
       csvData.forEach((row) => csvStream.write(row));
 
       // Finalizar o fluxo

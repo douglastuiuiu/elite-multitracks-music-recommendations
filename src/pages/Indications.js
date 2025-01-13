@@ -53,6 +53,7 @@ const Indications = () => {
           <tr>
             <th>Nome</th>
             <th>Email</th>
+            <th>Excede 7min</th>
             <th>Link do YouTube</th>
             <th>Data de Criação</th>
             <th>Ações</th>
@@ -63,6 +64,7 @@ const Indications = () => {
             <tr key={indication._id}>
               <td>{indication.name}</td>
               <td>{indication.email}</td>
+              <td>{indication.isLate ? 'Sim' : 'Não'}</td>
               <td>
                 <a href={indication.youtubeLink} target="_blank" rel="noopener noreferrer">
                   Ver Vídeo
