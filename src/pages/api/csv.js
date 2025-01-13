@@ -1,5 +1,5 @@
 import { createObjectCsvWriter } from 'csv-writer';
-import { openDb } from '../../utils/db'; // Função para abrir o banco de dados
+import { getDb } from '../../utils/db'; // Função para obter o banco de dados MongoDB
 import path from 'path';
 import fs from 'fs';
 
@@ -7,10 +7,19 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       // Conectar ao banco de dados
-      const db = await openDb();
+      const db = await getDb();
+      const collection = db.collection('indications');
 
       // Buscar todas as indicações
-      const indications = await db.all('SELECT * FROM indications');
+      const indications = await collection.find({}).toArray();
+
+      // Transformar os dados para o formato esperado pelo CSV Writer
+      const csvData = indications.map((indication) => ({
+        name: indication.name,
+        email: indication.email,
+        youtubeLink: indication.youtubeLink,
+        createdAt: new Date(indication.createdAt).toLocaleString(),
+      }));
 
       // Definir o caminho para o arquivo CSV (salvando na pasta temporária)
       const timestamp = new Date().toISOString().replace(/[:]/g, '-');
@@ -19,7 +28,6 @@ export default async function handler(req, res) {
       const csvWriter = createObjectCsvWriter({
         path: filePath, // Caminho dinâmico com data
         header: [
-          { id: 'id', title: 'ID' },
           { id: 'name', title: 'Nome' },
           { id: 'email', title: 'Email' },
           { id: 'youtubeLink', title: 'Link do YouTube' },
@@ -28,7 +36,7 @@ export default async function handler(req, res) {
       });
 
       // Escrever os dados no arquivo CSV
-      await csvWriter.writeRecords(indications);
+      await csvWriter.writeRecords(csvData);
 
       // Definir o cabeçalho para download do arquivo CSV
       res.setHeader('Content-Type', 'text/csv');
@@ -43,7 +51,7 @@ export default async function handler(req, res) {
         fs.unlinkSync(filePath); // Apagar o arquivo após o envio
       });
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao gerar o CSV:', error);
       res.status(500).json({ error: 'Erro ao gerar o CSV' });
     }
   } else {

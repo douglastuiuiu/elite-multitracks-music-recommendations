@@ -1,105 +1,87 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-import fs from 'fs';
-import path from 'path';
+import { MongoClient } from 'mongodb';
 
-// Função para abrir a conexão com o banco de dados
-export async function openDb() {
-  const dbPath = path.join('/tmp', 'database.db');  // Alterado para usar a pasta /tmp
+// URL de conexão com o MongoDB Atlas (Use variáveis de ambiente em produção)
+const url = process.env.MONGO_URI || 'mongodb+srv://douglastuiuiu:NjbijcTnsXn8GD4u@cluster.memtd.mongodb.net/?retryWrites=true&w=majority&appName=cluster';
+const dbName = 'elite'; // Nome do banco de dados
 
-  const db = await open({
-    filename: dbPath,
-    driver: sqlite3.Database,
-  });
+let client;
+let db;
 
-  return db;
-}
-
-// Função para criar a tabela de indicações (caso não exista)
-async function createIndicationsTable(db) {
-  await db.run(`
-    CREATE TABLE IF NOT EXISTS indications (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL,
-      youtubeLink TEXT NOT NULL,
-      createdAt TEXT NOT NULL
-    );
-  `);
-
-  console.log('Tabela "indications" criada ou já existente.');
-}
-
-// Função para sobrescrever o banco de dados (remover e recriar)
-async function overwriteDatabase() {
-  const dbPath = path.join(process.cwd(), 'tmp', 'database.db');
-
-  // Verificar se o arquivo do banco de dados já existe
-  if (fs.existsSync(dbPath)) {
-    try {
-      // Excluir o arquivo existente
-      fs.unlinkSync(dbPath);
-      console.log('Arquivo de banco de dados antigo removido.');
-    } catch (error) {
-      console.error('Erro ao excluir o banco de dados:', error);
-    }
+// Função para abrir ou reutilizar a conexão com o MongoDB
+export async function getDb() {
+  if (!client) {
+    client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
+    await client.connect();
+    console.log('Conectado ao banco de dados MongoDB Atlas');
+  }
+  
+  if (!db) {
+    db = client.db(dbName);
   }
 
-  // Criar um novo banco de dados
-  const db = await openDb();
-
-  // Criar a tabela de indicações (caso não exista)
-  await createIndicationsTable(db);
-  console.log('Novo banco de dados criado e tabela "indications" recriada.');
-
-  return db;
+  return db; // Retorna a instância do banco de dados
 }
 
-// Função para salvar uma indicação no banco de dados
+// Função para salvar uma indicação no MongoDB
 export async function saveIndication({ name, email, youtubeLink }) {
-  const db = await openDb();
+  const db = await getDb();
+  const collection = db.collection('indications');
 
-  const existingIndication = await db.get(
-    'SELECT * FROM indications WHERE email = ?',
-    [email]
-  );
+  try {
+    // Verifica se já existe uma indicação com o mesmo e-mail
+    const existingIndication = await collection.findOne({ email });
 
-  if (existingIndication) {
-    throw new Error('Este e-mail já fez uma indicação.');
+    if (existingIndication) {
+      throw new Error('Este e-mail já fez uma indicação.');
+    }
+
+    // Insere uma nova indicação na coleção
+    await collection.insertOne({
+      name,
+      email,
+      youtubeLink,
+      createdAt: new Date().toISOString(),
+    });
+    console.log('Indicação salva com sucesso.');
+  } catch (error) {
+    console.error('Erro ao salvar indicação:', error);
+    throw error;
   }
-
-  await db.run(
-    'INSERT INTO indications (name, email, youtubeLink, createdAt) VALUES (?, ?, ?, ?)',
-    [name, email, youtubeLink, new Date().toISOString()]
-  );
 }
 
-// Função para buscar músicas no banco com base no nome ou URL
-export async function getMusicFromChannel(searchTerm) {
-  const db = await openDb();
+// Função para buscar as indicações no MongoDB
+export async function searchIndications(searchTerm) {
+  const db = await getDb();
+  const collection = db.collection('indications');
 
-  const videos = await db.all(
-    'SELECT * FROM indications WHERE name LIKE ? OR youtubeLink LIKE ?',
-    [`%${searchTerm}%`, `%${searchTerm}%`]
-  );
+  try {
+    // Realiza a busca por nome ou link do YouTube
+    const results = await collection.find({
+      $or: [
+        { name: { $regex: searchTerm, $options: 'i' } }, // Pesquisa por nome (case-insensitive)
+        { youtubeLink: { $regex: searchTerm, $options: 'i' } }, // Pesquisa por link do YouTube (case-insensitive)
+      ]
+    }).toArray();
 
-  return videos;
+    return results; // Retorna as indicações que correspondem ao termo de pesquisa
+  } catch (error) {
+    console.error('Erro ao buscar indicações:', error);
+    throw error;
+  }
 }
 
-// Inicializar o banco de dados ao iniciar a aplicação (só executa no primeiro carregamento)
+// Função para fechar a conexão com o banco de dados (importante para testes ou ambientes controlados)
+export async function closeDb() {
+  if (client) {
+    await client.close();
+    console.log('Conexão com o banco de dados fechada.');
+  }
+}
+
+// Inicializar o banco de dados ao iniciar a aplicação (executa uma vez)
 (async () => {
   try {
-    const dbPath = path.join(process.cwd(), 'tmp', 'database.db');
-    
-    // Verificar se o arquivo do banco de dados existe
-    if (!fs.existsSync(dbPath)) {
-      // Sobrescrever o banco de dados e recriar a tabela apenas se o banco não existir
-      await overwriteDatabase(); 
-    } else {
-      // Se o banco já existir, apenas criar a tabela caso não exista
-      const db = await openDb();
-      await createIndicationsTable(db);
-    }
+    await getDb(); // Só abre a conexão, sem necessidade de criar a coleção
   } catch (err) {
     console.error('Erro ao inicializar o banco de dados:', err);
   }
