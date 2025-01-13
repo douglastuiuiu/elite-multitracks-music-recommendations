@@ -19,8 +19,6 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Nenhuma indicação encontrada' });
       }
 
-      console.log('Indicações encontradas:', indications);
-
       // Gerar o nome do arquivo com timestamp
       const timestamp = new Date().toISOString().replace(/[:]/g, '-');
       const fileName = `indications_${timestamp}.csv`;
