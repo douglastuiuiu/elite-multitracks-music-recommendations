@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import SearchMusic from '../components/SearchMusic';
-import Link from 'next/link'; // Importa o Link para navegação entre páginas
+import Link from 'next/link';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 
@@ -17,7 +17,7 @@ export default function Home() {
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/searchMusic?query=${encodeURIComponent(query)}`);
+      const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
         setResults(data.results || []);
@@ -117,7 +117,7 @@ export default function Home() {
                       {!isElite && (
                         <Link
                           href={{
-                            pathname: '/IndicateMusic',
+                            pathname: '/New',
                             query: { youtubeLink: music.url },
                           }}
                           passHref

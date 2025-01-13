@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import styles from '../styles/Indications.module.css';
+import styles from '../styles/List.module.css';
 
-const Indications = () => {
+const List = () => {
   const [indications, setIndications] = useState([]);
 
   // Função para carregar as indicações da API
@@ -94,4 +94,4 @@ const Indications = () => {
   );
 };
 
-export default Indications;
+export default List;

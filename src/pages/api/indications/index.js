@@ -1,4 +1,4 @@
-import { getDb, searchIndications } from '../../utils/db';
+import { getDb, searchIndications } from '../../../utils/db';
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {

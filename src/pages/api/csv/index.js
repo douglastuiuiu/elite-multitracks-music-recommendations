@@ -1,4 +1,4 @@
-import { getDb } from '../../utils/db'; // Função para obter o banco de dados MongoDB
+import { getDb } from '../../../utils/db'; // Função para obter o banco de dados MongoDB
 import { format } from 'fast-csv';
 import path from 'path';
 import fs from 'fs';
