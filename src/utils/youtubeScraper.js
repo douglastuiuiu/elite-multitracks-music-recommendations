@@ -12,12 +12,9 @@ const ELITE_CHANNEL_ID = 'UC8WD-kFwKXQlFin1og1KsYw'; // ID do canal Elite
 export const youtubeScraper = {
   async searchVideos(query) {
     try {
-      // Concatenar a palavra "elite" à query
-      const modifiedQuery = `${query} elite`;
-
       const response = await youtube.search.list({
         part: 'snippet',
-        q: modifiedQuery, // Usar a query modificada
+        q: query,
         type: 'video',
         maxResults: 20,
       });

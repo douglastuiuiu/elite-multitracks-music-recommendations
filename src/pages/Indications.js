@@ -22,7 +22,7 @@ const Indications = () => {
   // Função para excluir uma indicação
   const handleDelete = async (id) => {
     const isConfirmed = window.confirm('Tem certeza que deseja excluir esta indicação?');
-    
+
     if (isConfirmed) {
       try {
         const response = await fetch(`/api/indications/${id}`, {

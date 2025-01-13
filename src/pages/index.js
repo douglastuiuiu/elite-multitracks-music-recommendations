@@ -113,25 +113,26 @@ export default function Home() {
 
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px' }}>
                       {/* Link para a página de indicar música com o link do vídeo passado como parâmetro */}
-                      <Link
-                        href={{
-                          pathname: '/IndicateMusic',
-                          query: { youtubeLink: music.url },
-                        }}
-                        passHref
-                      >
-                        <div
-                          style={{
-                            textDecoration: 'none',
-                            color: '#0070f3',
-                            fontWeight: 'bold',
-                            cursor: 'pointer', // Opcional: Para dar um visual de link
+                      {!isElite && (
+                        <Link
+                          href={{
+                            pathname: '/IndicateMusic',
+                            query: { youtubeLink: music.url },
                           }}
+                          passHref
                         >
-                          Indicar Música
-                        </div>
-                      </Link>
-
+                          <div
+                            style={{
+                              textDecoration: 'none',
+                              color: '#0070f3',
+                              fontWeight: 'bold',
+                              cursor: 'pointer', // Opcional: Para dar um visual de link
+                            }}
+                          >
+                            Indicar Música
+                          </div>
+                        </Link>
+                      )}
                     </div>
                   </div>
                 );
