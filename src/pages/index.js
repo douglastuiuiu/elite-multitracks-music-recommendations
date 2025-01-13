@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import SearchMusic from '../components/SearchMusic';
 import Link from 'next/link'; // Importa o Link para navegação entre páginas
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export default function Home() {
   const [results, setResults] = useState([]);
