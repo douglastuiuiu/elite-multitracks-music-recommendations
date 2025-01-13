@@ -27,15 +27,16 @@ export default async function handler(req, res) {
       const filePath = path.join('/tmp', fileName);
 
       // Definir cabeçalhos do CSV
-      const headers = ['Nome', 'Email', 'Link do YouTube', 'Excede 7min', 'Data de Criação'];
+      const headers = ['Nome', 'Email', 'Título', 'Excede 7min', 'Link YouTube', 'Data Criação'];
 
       // Definir os dados para o CSV
       const csvData = indications.map((indication) => ({
         Nome: indication.name,
         Email: indication.email,
-        'Link do YouTube': indication.youtubeLink,
+        'Título': indication.title,
         'Excede 7min': indication.isLate ? 'Sim' : 'Não',
-        'Data de Criação': new Date(indication.createdAt).toLocaleString('pt-BR', {
+        'Link YouTube': indication.youtubeLink,
+        'Data Criação': new Date(indication.createdAt).toLocaleString('pt-BR', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
