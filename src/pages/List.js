@@ -30,7 +30,6 @@ const List = () => {
         });
 
         if (response.ok) {
-          // Remove a indicação localmente após a exclusão
           setIndications((prevIndications) => prevIndications.filter((indication) => indication._id !== id));
         } else {
           console.error('Erro ao excluir a indicação');
@@ -53,6 +52,7 @@ const List = () => {
           <tr>
             <th>Nome</th>
             <th>Email</th>
+            <th>Título do Vídeo</th>
             <th>Excede 7min</th>
             <th>Link do YouTube</th>
             <th>Data de Criação</th>
@@ -64,6 +64,7 @@ const List = () => {
             <tr key={indication._id}>
               <td>{indication.name}</td>
               <td>{indication.email}</td>
+              <td>{indication.title}</td>
               <td>{indication.isLate ? 'Sim' : 'Não'}</td>
               <td>
                 <a href={indication.youtubeLink} target="_blank" rel="noopener noreferrer">
@@ -71,7 +72,6 @@ const List = () => {
                 </a>
               </td>
               <td>
-                {/* Formatação da data no padrão brasileiro */}
                 {new Date(indication.createdAt).toLocaleString('pt-BR', {
                   day: '2-digit',
                   month: '2-digit',

@@ -23,7 +23,7 @@ export async function getDb() {
 }
 
 // Função para salvar uma indicação no MongoDB
-export async function saveIndication({ name, email, youtubeLink, createdAt, isLate }) {
+export async function saveIndication({ name, email, title, isLate, youtubeLink, createdAt }) {
   const db = await getDb();
   const collection = db.collection('indications');
 
@@ -39,9 +39,10 @@ export async function saveIndication({ name, email, youtubeLink, createdAt, isLa
     await collection.insertOne({
       name,
       email,
+      title,
       youtubeLink,
-      createdAt,
       isLate,
+      createdAt,
     });
     
     console.log('Indicação salva com sucesso.');

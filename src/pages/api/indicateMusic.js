@@ -12,18 +12,20 @@ export default async function handler(req, res) {
 
     try {
       // Obter a duração do vídeo
-      const videoDuration = await youtubeScraper.getVideoDuration(youtubeLink);
+      const videoDetails = await youtubeScraper.getVideoDetails(youtubeLink);
 
       // Definir o valor de isLate com base no tempo do vídeo
-      const isLate = videoDuration > 7; // Verifica se a duração do vídeo é maior que 7 minutos
+      const isLate = videoDetails.duration > 7; // Verifica se a duração do vídeo é maior que 7 minutos
+      const title = videoDetails.title;
 
       // Criar a indicação com o novo atributo isLate
       const indication = {
         name,
         email,
+        title,
+        isLate,
         youtubeLink,
         createdAt: new Date(), // Preencher com a data atual
-        isLate,
       };
 
       // Tenta salvar a indicação no banco
