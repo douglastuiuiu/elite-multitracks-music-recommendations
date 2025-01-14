@@ -1,20 +1,23 @@
 import { useState } from 'react';
 import SearchMusic from '../components/SearchMusic';
 import Link from 'next/link';
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function Home() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
+  const [query, setQuery] = useState(''); // Estado para controlar a pesquisa
 
   const handleSearch = async (query) => {
     if (!query.trim()) {
       setResults([]);
+      setQuery(''); // Reseta o estado de query para indicar que não há pesquisa
       return [];
     }
 
+    setQuery(query); // Atualiza o estado de query quando há uma pesquisa
     setLoading(true);
     try {
       const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
@@ -40,16 +43,34 @@ export default function Home() {
     setAlertMessage(message);
   };
 
+  // Função para tratar a limpeza do campo de pesquisa
+  const handleClearSearch = () => {
+    setResults([]); // Limpa os resultados
+    setQuery(''); // Limpa o estado da pesquisa
+  };
+
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#f8f8f8', minHeight: '100vh', padding: '20px' }}>
+    <div style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#181a29', minHeight: '100vh', padding: '20px', color: '#ffffff' }}>
       <header style={{ textAlign: 'center', marginBottom: '30px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#333' }}>
-          Multitracks Elite - Indicações Março/2025
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img
+            src="/elite-1x.png"
+            alt="Logo"
+            style={{ width: '40px', height: '40px', marginRight: '10px' }} // Ajuste o tamanho conforme necessário
+          />
+          <h1 style={{ paddingTop: '17px', fontSize: '28px', fontWeight: 'bold', color: '#4CAF50', lineHeight: '40px' }}>
+            Multitracks Elite - Indicações Março/2025
+          </h1>
+        </div>
       </header>
-      <SearchMusic onSearch={handleSearch} onAlert={handleAlert} results={results} />
+      <SearchMusic
+        onSearch={handleSearch}
+        onAlert={handleAlert}
+        results={results}
+        onClear={handleClearSearch} // Adicionando a função de limpeza para o componente de pesquisa
+      />
       {alertMessage && (
-        <p style={{ color: 'red', fontSize: '18px', textAlign: 'center', marginTop: '20px' }}>
+        <p style={{ color: '#f44336', fontSize: '18px', textAlign: 'center', marginTop: '20px' }}>
           {alertMessage}
         </p>
       )}
@@ -58,90 +79,92 @@ export default function Home() {
           <p style={{ color: '#888', fontSize: '18px' }}>Carregando...</p>
         ) : (
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
-            {results.length === 0 ? (
-              <p style={{ color: '#888', fontSize: '18px' }}>Nenhum resultado encontrado :(</p>
-            ) : (
-              results.map((music, index) => {
-                const isElite = music.isElite;
+            {results.length === 0 && query.trim() && ( // Exibe a mensagem apenas se houver pesquisa e resultados vazios
+              <p style={{ color: '#ccc', fontSize: '18px' }}>Nenhum resultado encontrado :(</p>
+            )}
+            {results.map((music, index) => {
+              const isElite = music.isElite;
 
-                return (
-                  <div
-                    key={index}
+              return (
+                <div
+                  key={index}
+                  style={{
+                    width: '300px',
+                    padding: '15px',
+                    borderRadius: '15px',
+                    backgroundColor: isElite ? 'rgba(240, 90, 100, 0.4)' : 'rgba(35, 36, 62, 0.5)',
+                    boxShadow: '0 8px 15px rgba(0, 0, 0, 0.2)',
+                    textAlign: 'center',
+                    border: isElite ? '1px solid rgba(240, 90, 100, 0.8)' : '1px solid rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                  }}
+                >
+                  <a
+                    href={music.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={{
-                      width: '300px',
-                      padding: '15px',
-                      borderRadius: '15px',
-                      backgroundColor: isElite ? '#f8d7da' : '#ffffff',
-                      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                      textAlign: 'center',
-                      border: isElite ? '1px solid #f5c6cb' : '1px solid #ccc',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
+                      display: 'block',
+                      width: '100%',
+                      height: '0',
+                      paddingBottom: '56.25%',
+                      backgroundImage: `url(https://img.youtube.com/vi/${music.url.split('v=')[1]}/0.jpg)`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      borderRadius: '10px',
+                      marginBottom: '10px',
+                      textDecoration: 'none',
+                    }}
+                  />
+                  <h3
+                    style={{
+                      fontSize: '18px',
+                      color: '#ffffff',
+                      marginBottom: '10px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
                     }}
                   >
-                    <a
-                      href={music.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: 'block',
-                        width: '100%',
-                        height: '0',
-                        paddingBottom: '56.25%',
-                        backgroundImage: `url(https://img.youtube.com/vi/${music.url.split('v=')[1]}/0.jpg)`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        borderRadius: '10px',
-                        marginBottom: '10px',
-                        textDecoration: 'none',
-                      }}
-                    />
-                    <h3
-                      style={{
-                        fontSize: '18px',
-                        color: '#333',
-                        marginBottom: '10px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                      }}
-                    >
-                      {music.title}
-                    </h3>
+                    {music.title}
+                  </h3>
 
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px' }}>
-                      {/* Link para a página de indicar música com o link do vídeo passado como parâmetro */}
-                      {!isElite && (
-                        <Link
-                          href={{
-                            pathname: '/New',
-                            query: { youtubeLink: music.url },
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px' }}>
+                    {!isElite && (
+                      <Link
+                        href={{
+                          pathname: '/New',
+                          query: { youtubeLink: music.url },
+                        }}
+                        passHref
+                      >
+                        <div
+                          style={{
+                            textDecoration: 'none',
+                            color: '#1e90ff',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
                           }}
-                          passHref
                         >
-                          <div
-                            style={{
-                              textDecoration: 'none',
-                              color: '#0070f3',
-                              fontWeight: 'bold',
-                              cursor: 'pointer', // Opcional: Para dar um visual de link
-                            }}
-                          >
-                            Indicar Música
-                          </div>
-                        </Link>
-                      )}
-                    </div>
+                          Indicar Música
+                        </div>
+                      </Link>
+                    )}
                   </div>
-                );
-              })
-            )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
+      <Analytics />
+      <SpeedInsights />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import YouTube from 'react-youtube';
+import styles from '../styles/IndicateMusic.module.css'; // Importar estilos dedicados
 
 export default function IndicateMusic() {
   const router = useRouter();
@@ -10,10 +11,8 @@ export default function IndicateMusic() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  let videoId = '';
-  if (youtubeLink && youtubeLink.includes('v=')) {
-    videoId = youtubeLink.split('v=')[1].split('&')[0]; // Extrai o ID do vídeo
-  }
+  // Extrair o ID do vídeo do link do YouTube
+  const videoId = youtubeLink?.includes('v=') ? youtubeLink.split('v=')[1].split('&')[0] : '';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +38,7 @@ export default function IndicateMusic() {
         setMessage('Indicação realizada com sucesso!');
         setName('');
         setEmail('');
-        router.push('/Success'); // Opcional: redirecionar após sucesso
+        router.push('/Success'); // Redirecionar após sucesso
       } else {
         setMessage(data.error || 'Erro ao realizar a indicação.');
       }
@@ -51,14 +50,23 @@ export default function IndicateMusic() {
   };
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#f8f8f8', minHeight: '100vh', padding: '20px' }}>
-      <header style={{ textAlign: 'center', marginBottom: '30px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#333' }}>Indique uma Música</h1>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img
+            src="/elite-1x.png"
+            alt="Logo"
+            style={{ width: '40px', height: '40px', marginRight: '10px' }} // Ajuste o tamanho conforme necessário
+          />
+          <h1 style={{ paddingTop: '17px', fontSize: '28px', fontWeight: 'bold', lineHeight: '40px' }}>
+            Lista de Indicações
+          </h1>
+        </div>
       </header>
-      <div style={{ maxWidth: '600px', margin: '0 auto', backgroundColor: '#fff', padding: '20px', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+      <div className={styles.formWrapper}>
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '15px' }}>
-            <label htmlFor="name" style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Nome Completo:</label>
+          <div className={styles.formGroup}>
+            <label htmlFor="name">Nome Completo:</label>
             <input
               type="text"
               id="name"
@@ -66,11 +74,10 @@ export default function IndicateMusic() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
             />
           </div>
-          <div style={{ marginBottom: '15px' }}>
-            <label htmlFor="email" style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>E-mail:</label>
+          <div className={styles.formGroup}>
+            <label htmlFor="email">E-mail:</label>
             <input
               type="email"
               id="email"
@@ -78,27 +85,19 @@ export default function IndicateMusic() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
             />
           </div>
-          <div style={{ marginBottom: '15px', textAlign: 'center' }}>
-            <label htmlFor="video" style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Vídeo Selecionado:</label>
+          <div className={styles.videoWrapper}>
+            <label>Vídeo Selecionado:</label>
             <YouTube videoId={videoId} opts={{ height: '315', width: '100%' }} />
           </div>
-          {message && <p style={{ color: message.includes('sucesso') ? 'green' : 'red', fontSize: '16px', textAlign: 'center' }}>{message}</p>}
-          <div style={{ textAlign: 'center' }}>
-            <button
-              type="submit"
-              style={{
-                backgroundColor: loading ? '#ccc' : '#0070f3',
-                color: '#fff',
-                padding: '10px 20px',
-                border: 'none',
-                borderRadius: '5px',
-                fontWeight: 'bold',
-                cursor: loading ? 'not-allowed' : 'pointer',
-              }}
-            >
+          {message && (
+            <p className={message.includes('sucesso') ? styles.successMessage : styles.errorMessage}>
+              {message}
+            </p>
+          )}
+          <div className={styles.submitWrapper}>
+            <button type="submit" disabled={loading}>
               {loading ? 'Enviando...' : 'Indicar Música'}
             </button>
           </div>

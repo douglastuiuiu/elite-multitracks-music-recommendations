@@ -1,0 +1,84 @@
+.container {
+    font-family: 'Arial', sans-serif; /* Fonte global */
+    background-color: #181a29; /* Azul escuro */
+    color: #f5f5f5; /* Texto claro */
+    min-height: 100vh;
+    padding: 20px;
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .header h1 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff; /* Texto em branco */
+  }
+  
+  .formWrapper {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #202336; /* Fundo do formulário */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .formGroup {
+    margin-bottom: 15px;
+  }
+  
+  .formGroup label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #f5f5f5; /* Texto claro */
+  }
+  
+  .formGroup input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #1e90ff;
+    background-color: #181a29; /* Fundo escuro */
+    color: #f5f5f5; /* Texto claro */
+  }
+  
+  .videoWrapper {
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  .successMessage {
+    color: #4caf50; /* Verde sucesso */
+    font-size: 16px;
+    text-align: center;
+  }
+  
+  .errorMessage {
+    color: #f44336; /* Vermelho erro */
+    font-size: 16px;
+    text-align: center;
+  }
+  
+  .submitWrapper {
+    text-align: center;
+  }
+  
+  .submitWrapper button {
+    background-color: #007bff; /* Azul botão */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .submitWrapper button:disabled {
+    background-color: #cccccc; /* Cinza desabilitado */
+    cursor: not-allowed;
+  }
+  

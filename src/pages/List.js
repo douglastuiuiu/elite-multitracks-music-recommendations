@@ -46,7 +46,16 @@ const List = () => {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Lista de Indicações</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'left', marginTop:'-17px' }}>
+        <img
+          src="/elite-1x.png"
+          alt="Logo"
+          style={{ width: '40px', height: '40px', marginRight: '10px' }} // Ajuste o tamanho conforme necessário
+        />
+        <h1 style={{ paddingTop: '17px', fontSize: '28px', fontWeight: 'bold', lineHeight: '40px' }}>
+          Lista de Indicações
+        </h1>
+      </div>
       <table className={styles.table}>
         <thead>
           <tr>

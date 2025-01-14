@@ -8,8 +8,8 @@
 /* Estilos globais */
 body {
   font-family: 'Arial', sans-serif;
-  background-color: #f8f9fa; /* Fundo claro e neutro */
-  color: #333; /* Texto escuro para legibilidade */
+  background-color: #181a29; /* Azul escuro como fundo */
+  color: #f5f5f5; /* Texto claro para contraste */
   line-height: 1.6; /* Melhor espaçamento entre linhas */
   padding: 0;
   margin: 0;
@@ -20,19 +20,19 @@ body {
 
 /* Cabeçalhos */
 h1, h2, h3, h4, h5, h6 {
-  color: #222; /* Tons mais escuros para destaque */
+  color: #ffffff; /* Texto em branco para destaque */
   font-weight: bold;
   margin-bottom: 1rem;
 }
 
 /* Links */
 a {
-  color: #007bff; /* Azul sutil */
+  color: #1e90ff; /* Azul claro para links */
   text-decoration: none;
 }
 
 a:hover {
-  color: #0056b3; /* Tom mais escuro no hover */
+  color: #63a4ff; /* Tom mais claro no hover */
   text-decoration: underline;
 }
 
@@ -63,8 +63,8 @@ input, textarea, select {
 }
 
 input:focus, textarea:focus, select:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  border-color: #1e90ff;
+  box-shadow: 0 0 5px rgba(30, 144, 255, 0.5);
 }
 
 /* Listas */
@@ -81,9 +81,9 @@ li {
 footer {
   margin-top: auto;
   padding: 20px;
-  background-color: #f1f1f1;
+  background-color: #101221;
   text-align: center;
-  color: #666;
+  color: #888;
 }
 
 /* Adaptação para dispositivos menores */
@@ -103,7 +103,7 @@ footer {
   margin: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  background-color: #fff;
+  background-color: #202336; /* Fundo dos cards adaptado para contraste */
 }
 
 /* Estilo para vídeos com a palavra "elite" no título */
@@ -113,12 +113,8 @@ footer {
 }
 
 .video-card h3 {
-  color: #333;
-}
-
-.video-card h3 {
+  color: #ffffff;
   font-size: 18px;
-  color: #333;
   margin-bottom: 10px;
 
   /* Limitar o título a duas linhas e adicionar elipsis (...) */
