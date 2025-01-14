@@ -69,7 +69,7 @@ export default function SearchMusic({ onSearch, onAlert }) {
       <div style={{ position: 'relative', width: '80%', margin: '0 auto' }}>
         <input
           type="text"
-          placeholder="Pesquise por nome ou URL (não precisa ser completo)"
+          placeholder="Nome ou URL"
           value={query}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}

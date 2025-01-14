@@ -52,28 +52,36 @@ export default function Home() {
   return (
     <div style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#181a29', minHeight: '100vh', padding: '20px', color: '#ffffff' }}>
       <header style={{ textAlign: 'center', marginBottom: '30px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img
-            src="/elite-1x.png"
-            alt="Logo"
-            style={{ width: '40px', height: '40px', marginRight: '10px' }} // Ajuste o tamanho conforme necessário
-          />
+        <div style={{ display: 'flow', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img
+              src="/elite-1x.png"
+              alt="Logo"
+              style={{ width: '60px', height: '60px', marginRight: '10px' }} // Ajuste o tamanho conforme necessário
+            />
+            <h1 style={{ paddingTop: '17px', fontSize: '33px', fontWeight: 'bold', lineHeight: '40px' }}>
+              Multitracks Elite
+            </h1>
+          </div>
           <h1 style={{ paddingTop: '17px', fontSize: '28px', fontWeight: 'bold', color: '#4CAF50', lineHeight: '40px' }}>
-            Multitracks Elite - Indicações Março/2025
+            Indicações Março/2025
           </h1>
         </div>
-      </header>
+
+      </header >
       <SearchMusic
         onSearch={handleSearch}
         onAlert={handleAlert}
         results={results}
         onClear={handleClearSearch} // Adicionando a função de limpeza para o componente de pesquisa
       />
-      {alertMessage && (
-        <p style={{ color: '#f44336', fontSize: '18px', textAlign: 'center', marginTop: '20px' }}>
-          {alertMessage}
-        </p>
-      )}
+      {
+        alertMessage && (
+          <p style={{ color: '#f44336', fontSize: '18px', textAlign: 'center', marginTop: '20px' }}>
+            {alertMessage}
+          </p>
+        )
+      }
       <div style={{ marginTop: '20px', textAlign: 'center' }}>
         {loading ? (
           <p style={{ color: '#888', fontSize: '18px' }}>Carregando...</p>
@@ -165,6 +173,6 @@ export default function Home() {
       </div>
       <Analytics />
       <SpeedInsights />
-    </div>
+    </div >
   );
 }

@@ -59,7 +59,7 @@ export default function IndicateMusic() {
             style={{ width: '40px', height: '40px', marginRight: '10px' }} // Ajuste o tamanho conforme necessário
           />
           <h1 style={{ paddingTop: '17px', fontSize: '28px', fontWeight: 'bold', lineHeight: '40px' }}>
-            Lista de Indicações
+            Indicar essa Música
           </h1>
         </div>
       </header>
