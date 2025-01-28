@@ -28,11 +28,18 @@ export async function saveIndication({ name, email, title, isLate, youtubeLink, 
   const collection = db.collection('indications');
 
   try {
+    let existingIndication = undefined;
+    
     // Verifica se já existe uma indicação com o mesmo e-mail
-    const existingIndication = await collection.findOne({ email });
-
+    existingIndication = await collection.findOne({ email });
     if (existingIndication) {
       throw new Error('Este e-mail já fez uma indicação.');
+    }
+
+    // Verifica se já existe uma indicação com o mesmo link
+    existingIndication = await collection.findOne({ youtubeLink });
+    if (existingIndication) {
+      throw new Error('Está músoca já foi indicada por outro participante.');
     }
 
     // Insere uma nova indicação na coleção, incluindo o campo isLate
