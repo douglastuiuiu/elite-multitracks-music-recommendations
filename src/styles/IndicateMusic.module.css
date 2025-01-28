@@ -82,3 +82,45 @@
     cursor: not-allowed;
   }
   
+  .buttonWrapper {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Espaçamento entre os botões */
+    margin-top: 20px;
+  }
+  
+  .backButton,
+  .submitButton {
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  /* Botão "Voltar" */
+  .backButton {
+    background-color: #f0f0f0; /* Fundo claro */
+    color: #333; /* Texto em cinza escuro */
+  }
+  
+  .backButton:hover {
+    background-color: #e0e0e0; /* Fundo mais escuro no hover */
+  }
+  
+  /* Botão "Indicar Música" */
+  .submitButton {
+    background-color: #007bff;
+    color: white; /* Texto branco */
+  }
+  
+  .submitButton:hover {
+    background-color: #0056b3;
+  }
+  
+  .submitButton:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+  }
+  

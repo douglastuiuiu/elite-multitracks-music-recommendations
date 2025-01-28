@@ -96,8 +96,11 @@ export default function IndicateMusic() {
               {message}
             </p>
           )}
-          <div className={styles.submitWrapper}>
-            <button type="submit" disabled={loading}>
+          <div className={styles.buttonWrapper}>
+            <button type="button" onClick={() => router.push('/')} className={styles.backButton}>
+              Voltar
+            </button>
+            <button type="submit" disabled={loading} className={styles.submitButton}>
               {loading ? 'Enviando...' : 'Indicar Música'}
             </button>
           </div>

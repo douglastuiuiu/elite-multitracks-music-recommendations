@@ -39,7 +39,7 @@ export async function saveIndication({ name, email, title, isLate, youtubeLink, 
     // Verifica se já existe uma indicação com o mesmo link
     existingIndication = await collection.findOne({ youtubeLink });
     if (existingIndication) {
-      throw new Error('Está música já foi indicada por outro participante.\nAproveita pra indicar outra!');
+      throw new Error('Está música já foi indicada por outro participante. Aproveite pra indicar outra!');
     }
 
     // Insere uma nova indicação na coleção, incluindo o campo isLate
