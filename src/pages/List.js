@@ -33,9 +33,11 @@ const List = () => {
           setIndications((prevIndications) => prevIndications.filter((indication) => indication._id !== id));
         } else {
           console.error('Erro ao excluir a indicação');
+          alert('Erro ao excluir a indicação');
         }
       } catch (error) {
         console.error('Erro ao conectar com a API para exclusão:', error);
+        alert('Erro ao conectar com o servidor');
       }
     }
   };
@@ -46,15 +48,17 @@ const List = () => {
 
   return (
     <div className={styles.container}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'left', marginTop:'-17px' }}>
-        <img
-          src="/elite-1x.png"
-          alt="Logo"
-          style={{ width: '40px', height: '40px', marginRight: '10px' }} // Ajuste o tamanho conforme necessário
-        />
-        <h1 style={{ paddingTop: '17px', fontSize: '28px', fontWeight: 'bold', lineHeight: '40px' }}>
-          Lista de Indicações
-        </h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '-17px' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <img
+            src="/elite-1x.png"
+            alt="Logo"
+            style={{ width: '40px', height: '40px', marginRight: '10px' }}
+          />
+          <h1 style={{ paddingTop: '17px', fontSize: '28px', fontWeight: 'bold', lineHeight: '40px' }}>
+            Lista de Indicações
+          </h1>
+        </div>
       </div>
       <table className={styles.table}>
         <thead>
@@ -76,7 +80,12 @@ const List = () => {
               <td>{indication.title}</td>
               <td>{indication.isLate ? 'Sim' : 'Não'}</td>
               <td>
-                <a href={indication.youtubeLink} target="_blank" rel="noopener noreferrer">
+                <a 
+                  href={indication.youtubeLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={styles.videoLink}
+                >
                   Ver Vídeo
                 </a>
               </td>
@@ -91,7 +100,11 @@ const List = () => {
                 })}
               </td>
               <td>
-                <button className={styles.deleteButton} onClick={() => handleDelete(indication._id)}>
+                <button 
+                  className={styles.deleteButton} 
+                  onClick={() => handleDelete(indication._id)}
+                  aria-label="Excluir indicação"
+                >
                   Excluir
                 </button>
               </td>

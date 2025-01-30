@@ -120,7 +120,7 @@ export default function Home() {
                       width: '100%',
                       height: '0',
                       paddingBottom: '56.25%',
-                      backgroundImage: `url(https://img.youtube.com/vi/${music.url.split('v=')[1]}/0.jpg)`,
+                      backgroundImage: `url(https://img.youtube.com/vi/${music.url.split('/')[3]}/0.jpg)`,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                       borderRadius: '10px',

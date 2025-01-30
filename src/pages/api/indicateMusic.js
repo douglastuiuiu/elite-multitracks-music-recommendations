@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       const videoDetails = await youtubeScraper.getVideoDetails(youtubeLink);
 
       // Definir o valor de isLate com base no tempo do vídeo
-      const isLate = videoDetails.duration > 7; // Verifica se a duração do vídeo é maior que 7 minutos
+      const isLate = videoDetails.duration > 420; // Verifica se a duração do vídeo é maior que 7 minutos
       const title = videoDetails.title;
 
       // Criar a indicação com o novo atributo isLate

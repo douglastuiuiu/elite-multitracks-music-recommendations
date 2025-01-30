@@ -12,7 +12,7 @@ export default function IndicateMusic() {
   const [loading, setLoading] = useState(false);
 
   // Extrair o ID do vídeo do link do YouTube
-  const videoId = youtubeLink?.includes('v=') ? youtubeLink.split('v=')[1].split('&')[0] : '';
+  const videoId = youtubeLink?.includes('/') ? youtubeLink.split('/')[3].split('&')[0] : '';
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -30,16 +30,16 @@ export async function saveIndication({ name, email, title, isLate, youtubeLink, 
   try {
     let existingIndication = undefined;
     
-    // Verifica se já existe uma indicação com o mesmo e-mail
-    existingIndication = await collection.findOne({ email });
-    if (existingIndication) {
-      throw new Error('Este e-mail já fez uma indicação.');
-    }
-
     // Verifica se já existe uma indicação com o mesmo link
     existingIndication = await collection.findOne({ youtubeLink });
     if (existingIndication) {
       throw new Error('Está música já foi indicada por outro participante. Aproveite pra indicar outra!');
+    }
+    
+    // Verifica se já existe uma indicação com o mesmo e-mail
+    existingIndication = await collection.findOne({ email });
+    if (existingIndication) {
+      throw new Error('Este e-mail já fez uma indicação.');
     }
 
     // Insere uma nova indicação na coleção, incluindo o campo isLate
