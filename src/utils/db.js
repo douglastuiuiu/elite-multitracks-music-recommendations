@@ -1,8 +1,8 @@
 import { MongoClient } from 'mongodb';
 
 // URL de conexão com o MongoDB Atlas (Use variáveis de ambiente em produção)
-const url = process.env.MONGO_URI || 'mongodb+srv://douglastuiuiu:NjbijcTnsXn8GD4u@cluster.memtd.mongodb.net/?retryWrites=true&w=majority&appName=cluster';
-const dbName = 'elite'; // Nome do banco de dados
+const url = process.env.MONGO_URI;
+const dbName = process.env.MONGO_DATABASE;
 
 let client;
 let db;

@@ -1,125 +1,262 @@
 import { google } from 'googleapis';
 import axios from 'axios';
+import { z } from 'zod';
 
-const YOUTUBE_API_KEY = 'AIzaSyBYJ_IRtMDlHiDTnkqOWY5bF-GbaxMwMF0';
-const ELITE_CHANNEL_ID = 'UC8WD-kFwKXQlFin1og1KsYw'; // ID do canal Elite
-
-// Configuração da API do YouTube
-const youtube = google.youtube({
-  version: 'v3',
-  auth: YOUTUBE_API_KEY,
+// Configurações validadas com Zod
+const envSchema = z.object({
+  YOUTUBE_API_KEY: z.string().min(1),
+  ELITE_CHANNEL_ID: z.string().min(1),
+  CACHE_TTL: z.coerce.number().default(300_000) // 5 minutos
 });
 
-// Função para buscar vídeos de um canal do YouTube
+const env = envSchema.parse(process.env);
+
+// Configuração otimizada da API
+const youtube = google.youtube({
+  version: 'v3',
+  auth: env.YOUTUBE_API_KEY,
+  params: {
+    prettyPrint: false,
+    alt: 'json'
+  }
+});
+
+// Helpers reutilizáveis
+const YOUTUBE_URL_REGEX = /^(https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})(?:[&?#].*)?$/i;
+const ISO8601_DURATION_REGEX = /P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+
+const parseDuration = (isoDuration) => {
+  try {
+    const matches = ISO8601_DURATION_REGEX.exec(isoDuration) || [];
+    const [
+      years = 0,
+      months = 0,
+      weeks = 0,
+      days = 0,
+      hours = 0,
+      mins = 0,
+      secs = 0
+    ] = matches.slice(1).map(m => parseInt(m) || 0);
+
+    return {
+      years,
+      months,
+      weeks,
+      days,
+      hours,
+      minutes: mins,
+      seconds: secs,
+      totalSeconds: 
+        (years * 365 * 24 * 60 * 60) +
+        (months * 30 * 24 * 60 * 60) +
+        (weeks * 7 * 24 * 60 * 60) +
+        (days * 24 * 60 * 60) +
+        (hours * 60 * 60) +
+        (mins * 60) +
+        secs
+    };
+  } catch (error) {
+    console.error('Error parsing duration:', isoDuration);
+    return { totalSeconds: 0 };
+  }
+};
+
+const cache = new Map();
+
+const fetchWithCache = async (key, fn, ttl = env.CACHE_TTL) => {
+  if (cache.has(key)) {
+    const { expires, value } = cache.get(key);
+    if (Date.now() < expires) return value;
+  }
+
+  const value = await fn();
+  cache.set(key, { 
+    expires: Date.now() + ttl,
+    value 
+  });
+  
+  return value;
+};
+
+// Schemas de validação
+const VideoSchema = z.object({
+  title: z.string(),
+  url: z.string().url(),
+  isElite: z.boolean()
+});
+
+const VideoDetailsSchema = z.object({
+  title: z.string(),
+  duration: z.number().nonnegative().transform(val => isNaN(val) ? 0 : val)
+});
+
 export const youtubeScraper = {
+  /**
+   * Busca vídeos no YouTube
+   * @param {string} query - Termo de busca ou URL
+   * @returns {Promise<VideoType[]>}
+   */
   async searchVideos(query) {
     try {
-      // Primeira tentativa: API oficial do YouTube
-      const response = await youtube.search.list({
+      const urlMatch = YOUTUBE_URL_REGEX.exec(query);
+      
+      if (urlMatch) {
+        const videoId = urlMatch[2];
+        return this.fetchVideoById(videoId);
+      }
+      
+      return this.searchVideosByQuery(query);
+    } catch (error) {
+      console.error('YouTube search failed:', error);
+      return this.fallbackSearch(query);
+    }
+  },
+
+  /**
+   * Obtém detalhes do vídeo
+   * @param {string} youtubeLink - URL do vídeo
+   * @returns {Promise<VideoDetailsType>}
+   */
+  async getVideoDetails(youtubeLink) {
+    try {
+      const videoId = YOUTUBE_URL_REGEX.exec(youtubeLink)?.[2];
+      if (!videoId) throw new Error('Invalid YouTube URL');
+
+      const details = await this.fetchVideoDetails(videoId);
+      return VideoDetailsSchema.parse(details);
+    } catch (error) {
+      console.error('Failed to get video details:', error);
+      return this.fallbackVideoDetails(youtubeLink);
+    }
+  },
+
+  // Métodos privados
+  async fetchVideoById(videoId) {
+    const cacheKey = `video-${videoId}`;
+    
+    return fetchWithCache(cacheKey, async () => {
+      const { data } = await youtube.videos.list({
+        id: videoId,
+        part: 'snippet',
+        maxResults: 1
+      });
+
+      const item = data.items?.[0];
+      if (!item) throw new Error('Video not found');
+
+      return [{
+        title: item.snippet.title,
+        url: `https://youtu.be/${videoId}`,
+        isElite: item.snippet.channelId === env.ELITE_CHANNEL_ID
+      }];
+    });
+  },
+
+  async searchVideosByQuery(query) {
+    const cacheKey = `search-${query}`;
+    
+    return fetchWithCache(cacheKey, async () => {
+      const { data } = await youtube.search.list({
         part: 'snippet',
         q: query,
         type: 'video',
         maxResults: 20,
+        safeSearch: 'none'
       });
 
-      const results = response.data.items.map((item) => ({
+      return (data.items || []).map(item => ({
         title: item.snippet.title,
-        url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-        isElite: item.snippet.channelId === ELITE_CHANNEL_ID,
-      }));
+        url: `https://youtu.be/${item.id.videoId}`,
+        isElite: item.snippet.channelId === env.ELITE_CHANNEL_ID
+      })).sort((a, b) => b.isElite - a.isElite);
+    });
+  },
 
-      const sortedResults = results.sort((a, b) => {
-        if (a.isElite && !b.isElite) return -1;
-        if (!a.isElite && b.isElite) return 1;
-        return 0;
+  async fetchVideoDetails(videoId) {
+    const cacheKey = `details-${videoId}`;
+    
+    return fetchWithCache(cacheKey, async () => {
+      const { data } = await youtube.videos.list({
+        id: videoId,
+        part: 'snippet,contentDetails'
       });
 
-      return sortedResults;
-    } catch (error) {
-      console.error('Erro ao buscar vídeos na API do YouTube. Tentando método alternativo:', error.message);
+      const video = data.items?.[0];
+      if (!video) throw new Error('Video not found');
 
-      // Segunda tentativa: Método alternativo usando API pública ou scraping
-      try {
-        const fallbackResponse = await axios.get(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`);
-        const html = fallbackResponse.data;
+      const duration = parseDuration(video.contentDetails.duration).totalSeconds || 0;
+      
+      return {
+        title: video.snippet.title,
+        duration: Number.isFinite(duration) ? duration : 0
+      };
+    });
+  },
 
-        // Parsing simplificado do HTML (bibliotecas como cheerio podem ajudar)
-        const videoMatches = html.match(/"videoId":"(.*?)"/g)?.slice(0, 20);
-        const titleMatches = html.match(/"title":{"runs":\[{"text":"(.*?)"}]/g)?.slice(0, 20);
+  async fallbackSearch(query) {
+    try {
+      const urlMatch = YOUTUBE_URL_REGEX.exec(query);
+      if (urlMatch) {
+        const videoId = urlMatch[2];
+        const { data } = await axios.get(`https://youtube.com/watch?v=${videoId}`);
+        
+        const title = data.match(/<title>(.*?)<\/title>/)?.[1]
+          ?.replace(/\s*-\s*YouTube$/, '') 
+          || 'Untitled';
 
-        if (!videoMatches || !titleMatches) {
-          throw new Error('Nenhum resultado encontrado na pesquisa alternativa');
-        }
-
-        const fallbackResults = videoMatches.map((match, index) => ({
-          title: titleMatches[index]?.replace(/.*"text":"(.*?)".*/, '$1'),
-          url: `https://www.youtube.com/watch?v=${match.replace(/.*"videoId":"(.*?)"/, '$1')}`,
-          isElite: false, // Não podemos verificar o canal com esta abordagem
-        }));
-
-        return fallbackResults;
-      } catch (fallbackError) {
-        console.error('Erro na busca alternativa:', fallbackError.message);
-        throw new Error('Erro ao buscar vídeos, ambos os métodos falharam');
+        return [{
+          title,
+          url: `https://youtu.be/${videoId}`,
+          isElite: false
+        }];
       }
+
+      const { data } = await axios.get(
+        `https://youtube.com/results?search_query=${encodeURIComponent(query)}`
+      );
+
+      const videoIds = [...new Set(
+        [...data.matchAll(/"videoId":"([\w-]{11})"/g)]
+          .map(m => m[1])
+      )].slice(0, 20);
+
+      const titles = [...data.matchAll(/"title":{"runs":\[{"text":"(.*?)"}/g)]
+        .map(m => m[1]?.replace(/\\"/g, '"') || 'Untitled');
+
+      return videoIds.map((id, index) => ({
+        title: titles[index] || 'Untitled',
+        url: `https://youtu.be/${id}`,
+        isElite: false
+      }));
+    } catch (error) {
+      throw new Error('All search methods failed');
     }
   },
 
-  // Função para obter informações detalhadas do vídeo
-  async getVideoDetails(youtubeLink) {
-    const videoId = youtubeLink.split('v=')[1]?.split('&')[0];
-
-    if (!videoId) {
-      throw new Error('ID do vídeo não encontrado');
-    }
-
+  async fallbackVideoDetails(url) {
     try {
-      // Primeira tentativa: API oficial do YouTube
-      const response = await youtube.videos.list({
-        id: videoId,
-        part: 'snippet,contentDetails',
-      });
+      const videoId = YOUTUBE_URL_REGEX.exec(url)?.[2];
+      if (!videoId) throw new Error('Invalid URL');
 
-      const videoData = response.data.items[0];
+      const { data } = await axios.get(`https://youtube.com/watch?v=${videoId}`);
+      
+      const title = data.match(/<meta property="og:title" content="(.*?)">/)?.[1]
+        ?.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(code)) 
+        || 'Untitled';
 
-      if (!videoData) {
-        throw new Error('Vídeo não encontrado');
-      }
-
-      const title = videoData?.snippet?.title;
-      const durationISO = videoData?.contentDetails?.duration;
-
-      // Converter a duração do formato ISO 8601 para minutos
-      const regex = /PT(\d+H)?(\d+M)?(\d+S)?/;
-      const match = durationISO.match(regex);
-      const hours = match[1] ? parseInt(match[1], 10) : 0;
-      const minutes = match[2] ? parseInt(match[2], 10) : 0;
-      const seconds = match[3] ? parseInt(match[3], 10) : 0;
-      const durationInMinutes = hours * 60 + minutes + seconds / 60;
+      const durationMatch = data.match(/"approxDurationMs":"(\d+)"/);
+      const durationMs = durationMatch ? parseInt(durationMatch[1], 10) || 0 : 0;
 
       return {
         title,
-        duration: durationInMinutes,
+        duration: Math.round(durationMs / 1000)
       };
     } catch (error) {
-      console.error('Erro ao obter detalhes do vídeo na API do YouTube. Tentando método alternativo:', error.message);
-
-      // Segunda tentativa: Método alternativo
-      try {
-        const response = await axios.get(`https://www.youtube.com/watch?v=${videoId}`);
-        const html = response.data;
-
-        const titleMatch = html.match(/<meta name="title" content="(.*?)">/);
-        const title = titleMatch ? titleMatch[1] : 'Título não encontrado';
-
-        return {
-          title,
-          duration: 'Indisponível via método alternativo', // Duração não é facilmente extraível sem a API oficial
-        };
-      } catch (fallbackError) {
-        console.error('Erro ao obter detalhes do vídeo via método alternativo:', fallbackError.message);
-        throw new Error('Erro ao obter detalhes do vídeo, ambos os métodos falharam');
-      }
+      console.error('Fallback video details failed:', error);
+      return {
+        title: 'Untitled',
+        duration: 0
+      };
     }
-  },
+  }
 };
