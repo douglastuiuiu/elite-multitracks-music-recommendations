@@ -1,16 +1,21 @@
+// pages/List.js
 import { useEffect, useState } from 'react';
 import styles from '../styles/List.module.css';
 
 const List = () => {
   const [indications, setIndications] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 10;
 
-  // Função para carregar as indicações da API
-  const loadIndications = async () => {
+  const loadIndications = async (page = 1) => {
     try {
-      const response = await fetch('/api/indications');
+      const response = await fetch(`/api/indications?page=${page}&limit=${itemsPerPage}`);
       if (response.ok) {
-        const data = await response.json();
+        const { data, totalCount } = await response.json();
         setIndications(data);
+        setTotalPages(Math.ceil(totalCount / itemsPerPage));
+        setCurrentPage(page);
       } else {
         console.error('Erro ao carregar as indicações');
       }
@@ -19,7 +24,6 @@ const List = () => {
     }
   };
 
-  // Função para excluir uma indicação
   const handleDelete = async (id) => {
     const isConfirmed = window.confirm('Tem certeza que deseja excluir esta indicação?');
 
@@ -30,7 +34,7 @@ const List = () => {
         });
 
         if (response.ok) {
-          setIndications((prevIndications) => prevIndications.filter((indication) => indication._id !== id));
+          loadIndications(currentPage); // Recarrega a página atual após exclusão
         } else {
           console.error('Erro ao excluir a indicação');
           alert('Erro ao excluir a indicação');
@@ -43,8 +47,44 @@ const List = () => {
   };
 
   useEffect(() => {
-    loadIndications();
+    loadIndications(currentPage);
   }, []);
+
+  const renderPagination = () => {
+    const pages = [];
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => loadIndications(i)}
+          className={i === currentPage ? styles.activePage : styles.pageButton}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    return (
+      <div className={styles.pagination}>
+        <button
+          onClick={() => loadIndications(1)}
+          disabled={currentPage === 1}
+        >
+          Início
+        </button>
+        {pages}
+        <button
+          onClick={() => loadIndications(totalPages)}
+          disabled={currentPage === totalPages}
+        >
+          Final
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className={styles.container}>
@@ -112,6 +152,7 @@ const List = () => {
           ))}
         </tbody>
       </table>
+      {totalPages > 1 && renderPagination()}
     </div>
   );
 };

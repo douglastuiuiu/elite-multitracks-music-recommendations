@@ -1,22 +1,30 @@
+// pages/api/indications/index.js
 import { getDb, searchIndications } from '../../../utils/db';
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
-      const { searchTerm } = req.query; // Obtém o parâmetro searchTerm da query string
+      const { searchTerm, page = 1, limit = 10 } = req.query;
+      const pageNumber = parseInt(page);
+      const limitNumber = parseInt(limit);
+      const skip = (pageNumber - 1) * limitNumber;
 
-      let indications;
-
+      let query = {};
       if (searchTerm) {
-        // Se um termo de busca for fornecido, utiliza a função de busca
-        indications = await searchIndications(searchTerm);
-      } else {
-        // Caso contrário, retorna todas as indicações
-        const db = await getDb();
-        indications = await db.collection('indications').find().toArray();
+        query = { $text: { $search: searchTerm } };
       }
 
-      res.status(200).json(indications); // Retorna os dados no formato JSON
+      const db = await getDb();
+      const [data, totalCount] = await Promise.all([
+        db.collection('indications')
+          .find(query)
+          .skip(skip)
+          .limit(limitNumber)
+          .toArray(),
+        db.collection('indications').countDocuments(query)
+      ]);
+
+      res.status(200).json({ data, totalCount });
     } catch (error) {
       console.error('Erro ao buscar as indicações:', error);
       res.status(500).json({ error: 'Erro ao buscar as indicações.' });
