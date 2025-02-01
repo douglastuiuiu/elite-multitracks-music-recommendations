@@ -14,15 +14,13 @@ export default async function handler(req, res) {
       // Obter os detalhes do vídeo, incluindo o título
       const videoDetails = await youtubeScraper.getVideoDetails(youtubeLink);
 
-      // if (!videoDetails || !videoDetails.title) {
-      //   throw new Error('Não foi possível obter os detalhes do vídeo. Verifique o link fornecido.');
-      // }
+      if (!videoDetails) {
+        throw new Error('Não foi possível obter os detalhes do vídeo. Verifique o link fornecido.');
+      }
 
       // Definir o valor de isLate com base no tempo do vídeo
       const isLate = videoDetails.duration > 420; // Verifica se a duração do vídeo é maior que 7 minutos
       const title = videoDetails.title;
-
-      console.log('Título do vídeo:', title); // Log para debug
 
       // Criar a indicação com o novo atributo isLate
       const indication = {
