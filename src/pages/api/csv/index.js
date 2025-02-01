@@ -1,4 +1,4 @@
-import { getDb } from '../../../utils/db'; // Função para obter o banco de dados MongoDB
+import { getDb } from '../../../utils/db';
 import { format } from 'fast-csv';
 import path from 'path';
 import fs from 'fs';
@@ -6,30 +6,27 @@ import fs from 'fs';
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
-      // Conectar ao banco de dados
       const db = await getDb();
       const collection = db.collection('indications');
-
-      // Buscar todas as indicações
       const indications = await collection.find({}).toArray();
 
-      // Verificar se há indicações
       if (indications.length === 0) {
         console.log('Nenhuma indicação encontrada no banco');
         return res.status(404).json({ error: 'Nenhuma indicação encontrada' });
       }
 
-      // Gerar o nome do arquivo com timestamp
       const timestamp = new Date().toISOString().replace(/[:]/g, '-');
       const fileName = `indications_${timestamp}.csv`;
+      const tmpDir = '/tmp';
+      
+      // Criar diretório tmp se não existir
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir, { recursive: true });
+      }
 
-      // Caminho do arquivo temporário no diretório /tmp
-      const filePath = path.join('/tmp', fileName);
-
-      // Definir cabeçalhos do CSV
+      const filePath = path.join(tmpDir, fileName);
       const headers = ['Nome', 'Email', 'Título', 'Excede 7min', 'Link YouTube', 'Data Criação'];
 
-      // Definir os dados para o CSV
       const csvData = indications.map((indication) => ({
         Nome: indication.name,
         Email: indication.email,
@@ -46,33 +43,22 @@ export default async function handler(req, res) {
         }),
       }));
 
-      // Criar fluxo de escrita para o CSV
       const writableStream = fs.createWriteStream(filePath);
-
-      // Criar e configurar o fluxo do CSV
       const csvStream = format({ headers: true });
 
-      // Pipar o fluxo para o arquivo
       csvStream.pipe(writableStream);
-
-      // Escrever os dados no CSV
       csvData.forEach((row) => csvStream.write(row));
-
-      // Finalizar o fluxo
       csvStream.end();
 
       writableStream.on('finish', () => {
-        // Enviar o arquivo gerado como resposta
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
 
-        // Ler o arquivo e enviar
         const fileStream = fs.createReadStream(filePath);
         fileStream.pipe(res);
 
-        // Remover o arquivo do diretório temporário após enviar
         fileStream.on('end', () => {
-          fs.unlinkSync(filePath); // Apagar o arquivo após o envio
+          fs.unlinkSync(filePath);
         });
       });
     } catch (error) {
