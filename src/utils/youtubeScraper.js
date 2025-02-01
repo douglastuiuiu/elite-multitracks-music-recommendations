@@ -202,7 +202,9 @@ export const youtubeScraper = {
       const titleMatch = data.match(/<meta name="title" content="([^"]*)/);
       const title = titleMatch ? this.unescapeHtml(titleMatch[1]) : 'Untitled';
 
-      console.log('Título do vídeo:', title); // Log para debug
+      console.log('data:', data); // Log para debug
+      console.log('titleMatch:', titleMatch); // Log para debug
+      console.log('title:', title); // Log para debug
 
       // Extrair duração
       let duration = 0;
