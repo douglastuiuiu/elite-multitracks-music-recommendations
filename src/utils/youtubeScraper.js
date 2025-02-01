@@ -242,20 +242,19 @@ export const youtubeScraper = {
         try {
           const jsonData = JSON.parse(jsonMatch[1]);
 
-          console.log('[fetchVideoDetails] jsonMatch:', jsonMatch); // Log para debug
-          console.log('[fetchVideoDetails] jsonData:', jsonData); // Log para debug
-
           const durationMs = jsonData.videoDetails?.lengthSeconds * 1000 
                             || jsonData.microformat?.playerMicroformatRenderer?.lengthSeconds * 1000;
           duration = Math.round((durationMs || 0) / 1000);
+
+          console.log('[fetchVideoDetailsCheerio] jsonMatch:', jsonMatch); // Log para debug
+          console.log('[fetchVideoDetailsCheerio] jsonData:', jsonData); // Log para debug
+          console.log('[fetchVideoDetailsCheerio] title:', title); // Log para debug
+          console.log('[fetchVideoDetailsCheerio] durationMs:', durationMs); // Log para debug
+
         } catch (error) {
           console.error('Erro ao analisar JSON:', error);
         }
       }
-
-
-      console.log('[fetchVideoDetails] title:', title); // Log para debug
-      console.log('[fetchVideoDetails] durationMs:', durationMs); // Log para debug
 
       return {
         title: this.unescapeHtml(title.trim()), // Limpar espaços e caracteres HTML
