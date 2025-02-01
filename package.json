@@ -13,6 +13,7 @@
     "@vercel/analytics": "^1.4.1",
     "@vercel/speed-insights": "^1.1.0",
     "axios": "^1.7.9",
+    "cheerio": "^1.0.0",
     "fast-csv": "^5.0.2",
     "fs": "^0.0.1-security",
     "googleapis": "^144.0.0",
