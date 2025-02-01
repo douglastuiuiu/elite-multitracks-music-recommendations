@@ -197,32 +197,23 @@ export const youtubeScraper = {
       const { data } = await axios.get(`https://www.youtube.com/watch?v=${videoId}`, {
         headers: getDefaultHeaders()
       });
-
-      // Extrair título
-      const titleMatch = data.match(/<meta name="title" content="([^"]*)/);
-      const titleMatch2 = data.match(/<title>(.*?)<\/title>/);
-      const title = titleMatch ? this.unescapeHtml(titleMatch[1]) : 'Untitled';
-      const title2 = titleMatch2 ? this.unescapeHtml(titleMatch2[1]) : 'Untitled';
-
-      console.log('titleMatch:', titleMatch); // Log para debug
-      console.log('titleMatch2:', titleMatch2); // Log para debug
-
-      console.log('title:', title); // Log para debug
-      console.log('title2:', title2); // Log para debug
+  
+      // Extrair título do JSON embutido
+      const jsonMatch = data.match(/var ytInitialPlayerResponse\s*=\s*({.+?});<\/script>/);
+      if (!jsonMatch) throw new Error('Dados não encontrados');
       
-      // Extrair duração
-      let duration = 0;
-      const durationMatch = data.match(/"approxDurationMs":"(\d+)"/);
-      if (durationMatch) {
-        duration = Math.round(parseInt(durationMatch[1], 10) / 1000);
-      } else {
-        const isoMatch = data.match(/<meta itemprop="duration" content="(PT[\w\d]+)"/);
-        if (isoMatch) duration = parseDuration(isoMatch[1]).totalSeconds;
-      }
+      const jsonData = JSON.parse(jsonMatch[1]);
+      const title = jsonData.videoDetails?.title || 'Untitled';
+      const durationMs = jsonData.videoDetails?.lengthSeconds * 1000 || jsonData.microformat?.playerMicroformatRenderer?.lengthSeconds * 1000;
 
+      console.log('jsonMatch:', jsonMatch); // Log para debug
+      console.log('jsonData:', jsonData); // Log para debug
+      console.log('title:', title); // Log para debug
+      console.log('durationMs:', durationMs); // Log para debug
+  
       return {
-        title,
-        duration: duration || 0
+        title: this.unescapeHtml(title),
+        duration: Math.round((durationMs || 0) / 1000)
       };
     });
   },
