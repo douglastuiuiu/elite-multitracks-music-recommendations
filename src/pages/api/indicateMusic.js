@@ -3,10 +3,10 @@ import { youtubeScraper } from '../../utils/youtubeScraper'; // Importar a funç
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { name, email, youtubeLink } = req.body;
+    const { name, email, youtubeLink, title } = req.body;
 
     // Verificar se todos os campos necessários estão presentes
-    if (!name || !email || !youtubeLink) {
+    if (!name || !email || !youtubeLink || !title) {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
     }
 
@@ -20,7 +20,6 @@ export default async function handler(req, res) {
 
       // Definir o valor de isLate com base no tempo do vídeo
       const isLate = videoDetails.duration > 420; // Verifica se a duração do vídeo é maior que 7 minutos
-      const title = videoDetails.title;
 
       // Criar a indicação com o novo atributo isLate
       const indication = {

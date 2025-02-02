@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { z } from 'zod';
-const cheerio = require('cheerio');
 
 // Configurações validadas com Zod
 const envSchema = z.object({
@@ -116,7 +115,6 @@ export const youtubeScraper = {
       const videoId = YOUTUBE_URL_REGEX.exec(youtubeLink)?.[2];
       if (!videoId) throw new Error('Invalid YouTube URL');
 
-      this.fetchVideoDetailsCheerio(videoId)
       return this.fetchVideoDetails(videoId);
     } catch (error) {
       console.error('Failed to get video details:', error);
@@ -199,66 +197,24 @@ export const youtubeScraper = {
       const { data } = await axios.get(`https://www.youtube.com/watch?v=${videoId}`, {
         headers: getDefaultHeaders()
       });
-  
-      // Extrair título do JSON embutido
-      const jsonMatch = data.match(/var ytInitialPlayerResponse\s*=\s*({.+?});<\/script>/);
-      if (!jsonMatch) throw new Error('Dados não encontrados');
-      
-      const jsonData = JSON.parse(jsonMatch[1]);
-      const title = jsonData.videoDetails?.title || 'Untitled';
-      const durationMs = jsonData.videoDetails?.lengthSeconds * 1000 || jsonData.microformat?.playerMicroformatRenderer?.lengthSeconds * 1000;
 
-      console.log('[fetchVideoDetails] jsonMatch:', jsonMatch); // Log para debug
-      console.log('[fetchVideoDetails] jsonData:', jsonData); // Log para debug
-      console.log('[fetchVideoDetails] title:', title); // Log para debug
-      console.log('[fetchVideoDetails] durationMs:', durationMs); // Log para debug
-  
-      return {
-        title: this.unescapeHtml(title),
-        duration: Math.round((durationMs || 0) / 1000)
-      };
-    });
-  },
+      // Extrair título
+      const titleMatch = data.match(/<meta name="title" content="([^"]*)/);
+      const title = titleMatch ? this.unescapeHtml(titleMatch[1]) : 'Untitled';
 
-  async fetchVideoDetailsCheerio(videoId) {
-    const cacheKey = `details-${videoId}`;
-    
-    return fetchWithCache(cacheKey, async () => {
-      const { data } = await axios.get(`https://www.youtube.com/watch?v=${videoId}`, {
-        headers: getDefaultHeaders()
-      });
-
-      const $ = cheerio.load(data); // Carregar o HTML no Cheerio
-
-      // Extrair título usando Cheerio (2 métodos de fallback)
-      const title = $('meta[name="title"]').attr('content') 
-                    || $('title').text().replace(' - YouTube', '') 
-                    || 'Untitled';
-      
-      // Extrair duração do JSON (método original mantido)
+      // Extrair duração
       let duration = 0;
-      const jsonMatch = data.match(/var ytInitialPlayerResponse\s*=\s*({.+?});<\/script>/);
-      if (jsonMatch) {
-        try {
-          const jsonData = JSON.parse(jsonMatch[1]);
-
-          const durationMs = jsonData.videoDetails?.lengthSeconds * 1000 
-                            || jsonData.microformat?.playerMicroformatRenderer?.lengthSeconds * 1000;
-          duration = Math.round((durationMs || 0) / 1000);
-
-          console.log('[fetchVideoDetailsCheerio] jsonMatch:', jsonMatch); // Log para debug
-          console.log('[fetchVideoDetailsCheerio] jsonData:', jsonData); // Log para debug
-          console.log('[fetchVideoDetailsCheerio] title:', title); // Log para debug
-          console.log('[fetchVideoDetailsCheerio] durationMs:', durationMs); // Log para debug
-
-        } catch (error) {
-          console.error('Erro ao analisar JSON:', error);
-        }
+      const durationMatch = data.match(/"approxDurationMs":"(\d+)"/);
+      if (durationMatch) {
+        duration = Math.round(parseInt(durationMatch[1], 10) / 1000);
+      } else {
+        const isoMatch = data.match(/<meta itemprop="duration" content="(PT[\w\d]+)"/);
+        if (isoMatch) duration = parseDuration(isoMatch[1]).totalSeconds;
       }
 
       return {
-        title: this.unescapeHtml(title.trim()), // Limpar espaços e caracteres HTML
-        duration: duration
+        title,
+        duration: duration || 0
       };
     });
   },

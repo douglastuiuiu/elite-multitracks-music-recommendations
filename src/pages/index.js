@@ -148,7 +148,7 @@ export default function Home() {
                       <Link
                         href={{
                           pathname: '/New',
-                          query: { youtubeLink: music.url },
+                          query: { youtubeLink: music.url, title: music.title },
                         }}
                         passHref
                       >
