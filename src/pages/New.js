@@ -17,7 +17,7 @@ export default function IndicateMusic() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !email || !youtubeLink || !title) {
+    if (!name || !email || !youtubeLink) {
       setMessage('Todos os campos são obrigatórios.');
       return;
     }

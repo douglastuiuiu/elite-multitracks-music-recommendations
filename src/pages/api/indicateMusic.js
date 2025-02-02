@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     const { name, email, youtubeLink, title } = req.body;
 
     // Verificar se todos os campos necessários estão presentes
-    if (!name || !email || !youtubeLink || !title) {
+    if (!name || !email || !youtubeLink) {
       return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
     }
 
