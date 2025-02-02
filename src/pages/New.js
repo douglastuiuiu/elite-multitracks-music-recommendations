@@ -5,7 +5,7 @@ import styles from '../styles/IndicateMusic.module.css'; // Importar estilos ded
 
 export default function IndicateMusic() {
   const router = useRouter();
-  const { youtubeLink } = router.query; // Captura o parâmetro da URL
+  const { youtubeLink, title } = router.query; // Captura o parâmetro da URL
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -17,7 +17,7 @@ export default function IndicateMusic() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !email || !youtubeLink) {
+    if (!name || !email || !youtubeLink || !title) {
       setMessage('Todos os campos são obrigatórios.');
       return;
     }
@@ -29,7 +29,7 @@ export default function IndicateMusic() {
       const response = await fetch('/api/indicateMusic', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, youtubeLink }),
+        body: JSON.stringify({ name, email, youtubeLink, title }),
       });
 
       const data = await response.json();
